@@ -33,6 +33,7 @@
       // Carga del modelo (pon aquí la ruta correcta)
       const loader = new THREE.GLTFLoader();
       loader.load('Neuro.glb', function(gltf) {
+        gltf.scene.rotation.z = Math.PI;
         modelGroup.add(gltf.scene);
 
         // Si el gltf tiene animaciones
