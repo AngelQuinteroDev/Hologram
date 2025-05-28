@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Holograma Pirámide</title>
+    <style>
+      body { margin: 0; background: black; overflow: hidden; }
+      canvas { display: block; }
+    </style>
+  </head>
+  <body>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.140.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.140.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script>
+      const scene = new THREE.Scene();
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setClearColor(0x000000); // fondo negro
+      document.body.appendChild(renderer.domElement);
+
+      const modelGroup = new THREE.Group();
+      scene.add(modelGroup);
+
+      // Luz
+      const light = new THREE.DirectionalLight(0xffffff, 1);
+      light.position.set(0, 5, 5);
+      scene.add(light);
+
+      // Variables para animación
+      let mixer = null;
+      const clock = new THREE.Clock();
+
+      // Carga del modelo (pon aquí la ruta correcta)
+      const loader = new THREE.GLTFLoader();
+      loader.load('Neuro.glb', function(gltf) {
+        modelGroup.add(gltf.scene);
+
+        // Si el gltf tiene animaciones
+        if (gltf.animations && gltf.animations.length) {
+          mixer = new THREE.AnimationMixer(gltf.scene);
+          gltf.animations.forEach((clip) => {
+            mixer.clipAction(clip).play();
+          });
+        }
+      }, undefined, function(error){
+        console.error('Error cargando el modelo:', error);
+      });
+
+// Cámaras
+const size = window.innerHeight / 2;
+const cameras = {
+  top: new THREE.PerspectiveCamera(45, 1, 0.1, 100),
+  bottom: new THREE.PerspectiveCamera(45, 1, 0.1, 100),
+  left: new THREE.PerspectiveCamera(45, 1, 0.1, 100),
+  right: new THREE.PerspectiveCamera(45, 1, 0.1, 100),
+};
+
+// Posicionamos más lejos (8 unidades)
+// Cámara frontal (top en tu código, renombramos a front para claridad)
+cameras.top.position.set(0, 0, 4);
+cameras.top.up.set(0, 1, 0);
+cameras.top.lookAt(0, 0, 0);
+
+// Cámara trasera (bottom en tu código)
+cameras.bottom.position.set(0, 0, -4);
+cameras.bottom.up.set(0, 1, 0);
+cameras.bottom.lookAt(0, 0, 0);
+
+// Cámara izquierda
+cameras.left.position.set(4, 0, 0);
+cameras.left.up.set(0, 1, 0);
+cameras.left.lookAt(0, 0, 0);
+
+// Cámara derecha
+cameras.right.position.set(-4, 0, 0);
+cameras.right.up.set(0, 1, 0);
+cameras.right.lookAt(0, 0, 0);
+
+
+
+const ambientLight = new THREE.AmbientLight(0x404040, 4); // Luz suave para que no haya zonas muy oscuras
+scene.add(ambientLight);
+
+// Opcional: luz hemisférica para dar más realismo (cielo y suelo)
+const hemiLight = new THREE.HemisphereLight(0xaaaaaa, 0x444444, 0.5);
+hemiLight.position.set(0, 20, 0);
+scene.add(hemiLight);
+
+function animate() {
+  requestAnimationFrame(animate);
+
+  const delta = clock.getDelta();
+  if (mixer) mixer.update(delta);
+
+  modelGroup.rotation.y += 0.01;
+
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+
+  const size = Math.min(w, h) / 2; // tamaño para cada viewport (cuadrado)
+
+  renderer.setScissorTest(true);
+
+
+  const offset = size / 2;
+  // Cámara frontal - arriba centro
+  renderer.setViewport(w / 2 - size / 2, h - size, size, size);
+  renderer.setScissor(w / 2 - size / 2, h - size, size, size);
+  renderer.render(scene, cameras.top);
+
+  // Cámara trasera - abajo centro
+  renderer.setViewport(w / 2 - size / 2, 0, size, size);
+  renderer.setScissor(w / 2 - size / 2, 0, size, size);
+  renderer.render(scene, cameras.bottom);
+
+  // Cámara izquierda - centro izquierda
+renderer.setViewport(offset, h / 2 - size / 2, size, size);
+renderer.setScissor(offset, h / 2 - size / 2, size, size);
+  renderer.render(scene, cameras.left);
+
+  // Cámara derecha - centro derecha
+renderer.setViewport(w - size - offset, h / 2 - size / 2, size, size);
+renderer.setScissor(w - size - offset, h / 2 - size / 2, size, size);
+  renderer.render(scene, cameras.right);
+
+  renderer.setScissorTest(false);
+}
+
+      animate();
+    </script>
+  </body>
+</html>
