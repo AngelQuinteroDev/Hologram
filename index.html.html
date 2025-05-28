@@ -60,6 +60,7 @@ const cameras = {
 cameras.top.position.set(0, 0, 4);
 cameras.top.up.set(0, 1, 0);
 cameras.top.lookAt(0, 0, 0);
+cameras.top.rotation.z = Math.PI;
 
 // Cámara trasera (bottom en tu código)
 cameras.bottom.position.set(0, 0, -4);
@@ -70,11 +71,13 @@ cameras.bottom.lookAt(0, 0, 0);
 cameras.left.position.set(4, 0, 0);
 cameras.left.up.set(0, 1, 0);
 cameras.left.lookAt(0, 0, 0);
+cameras.left.rotation.z = Math.PI / 2;
 
 // Cámara derecha
 cameras.right.position.set(-4, 0, 0);
 cameras.right.up.set(0, 1, 0);
 cameras.right.lookAt(0, 0, 0);
+cameras.right.rotation.z = -Math.PI / 2;
 
 
 
@@ -83,7 +86,7 @@ scene.add(ambientLight);
 
 // Opcional: luz hemisférica para dar más realismo (cielo y suelo)
 const hemiLight = new THREE.HemisphereLight(0xaaaaaa, 0x444444, 0.5);
-hemiLight.position.set(0, 20, 0);
+hemiLight.position.set(0, 15, 0);
 scene.add(hemiLight);
 
 function animate() {
